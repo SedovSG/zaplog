@@ -1,0 +1,25 @@
+dist: precise
+
+os:
+  - linux
+
+language: go
+
+branches:
+  only:
+  - main
+
+go:
+  - 1.15.x
+
+before_install:
+  - make setup
+
+script:
+  - make lint
+  - make test
+
+notifications:
+  email: SedovSG@yandex.ru
+  on_success: never
+  on_failure: always

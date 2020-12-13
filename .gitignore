@@ -1,0 +1,5 @@
+.idea/
+*.sublime-*
+Thumbs.db
+.DS_Store
+!.gitkeep
