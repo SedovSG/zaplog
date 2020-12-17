@@ -11,15 +11,8 @@ package zaplog
 import (
 	"github.com/SedovSG/zaplog/logger"
 	"go.uber.org/zap"
+	"log"
 )
-
-var zapLogger *zap.Logger = new(zap.Logger)
-
-// Метод инициализации
-func init() {
-	zapLogger, _ = logger.InitZapLogger()
-	defer zapLogger.Sync()
-}
 
 // Throw добавляет новые поля в лог
 // Для добавления данных контекста, отличных от Request и Response,
@@ -30,5 +23,11 @@ func init() {
 // Пример использования:
 // Throw("HEAD", "/api/v1/guides?", 500, map[string]interface{}{"data": DataModel{"Alex", 28}}).Info("Text message")
 func Throw(fields ...interface{}) *zap.Logger {
+	zapLogger, err := logger.InitZapLogger()
+	if err != nil {
+		log.Printf("Ошибка инициализации лога: %s", err.Error())
+		return nil
+	}
+
 	return logger.AddFields(fields, zapLogger)
 }

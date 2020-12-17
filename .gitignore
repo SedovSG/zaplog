@@ -1,5 +1,7 @@
 .idea/
 *.sublime-*
+.vscode/
 Thumbs.db
 .DS_Store
 !.gitkeep
+bin/

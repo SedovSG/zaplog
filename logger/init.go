@@ -6,7 +6,6 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -41,12 +40,16 @@ func InitZapLogger() (*zap.Logger, error) {
 	config.EncoderConfig.StacktraceKey = "stacktrace"
 	config.EncoderConfig.TimeKey = ""
 
-	logger, error := config.Build()
-	if error != nil {
-		log.Fatal(error)
+	logger, err := config.Build()
+	if err != nil {
+		return logger, err
 	}
 
-	return logger, error
+	defer func() {
+		err = logger.Sync()
+	}()
+
+	return logger, err
 }
 
 // AddFields добавляет поля в лог
@@ -76,64 +79,60 @@ func AddFields(fields []interface{}, logger *zap.Logger) *zap.Logger {
 			}
 		}
 
-		switch val.(type) {
+		switch val := val.(type) {
 		case *http.Request:
-			result := val.(*http.Request)
-
 			var body []byte
 
-			if result.Body != nil {
-				body, _ = ioutil.ReadAll(result.Body)
-				defer result.Body.Close()
+			if val.Body != nil {
+				body, _ = ioutil.ReadAll(val.Body)
+				defer val.Body.Close()
 			}
 
 			if method == "" {
-				method = result.Method
+				method = val.Method
 			}
 
 			if url == "" {
-				url = result.URL.String()
+				url = val.URL.String()
 			}
 
 			request, _ = json.Marshal(models.Request{
-				Method:     result.Method,
-				Proto:      result.Proto,
-				URL:        result.URL.String(),
-				RequestURI: result.RequestURI,
+				Method:     val.Method,
+				Proto:      val.Proto,
+				URL:        val.URL.String(),
+				RequestURI: val.RequestURI,
 				Body:       string(body),
-				Header:     result.Header,
-				Cookies:    result.Cookies(),
-				RemoteAddr: result.RemoteAddr,
-				UserAgent:  result.UserAgent(),
-				Referer:    result.Referer(),
+				Header:     val.Header,
+				Cookies:    val.Cookies(),
+				RemoteAddr: val.RemoteAddr,
+				UserAgent:  val.UserAgent(),
+				Referer:    val.Referer(),
 			})
 		case *http.Response:
-			result := val.(*http.Response)
-
 			var body []byte
 			var location string
 
-			if result.Body != nil {
-				body, _ = ioutil.ReadAll(result.Body)
-				defer result.Body.Close()
+			if val.Body != nil {
+				body, _ = ioutil.ReadAll(val.Body)
+				defer val.Body.Close()
 			}
 
-			if loc, _ := result.Location(); loc != nil {
+			if loc, _ := val.Location(); loc != nil {
 				location = loc.String()
 			}
 
 			if code == 0 {
-				code = result.StatusCode
+				code = val.StatusCode
 			}
 
 			response, _ = json.Marshal(models.Response{
-				Status:     result.Status,
-				StatusCode: result.StatusCode,
-				Proto:      result.Proto,
+				Status:     val.Status,
+				StatusCode: val.StatusCode,
+				Proto:      val.Proto,
 				Location:   location,
 				Body:       string(body),
-				Header:     result.Header,
-				Cookies:    result.Cookies(),
+				Header:     val.Header,
+				Cookies:    val.Cookies(),
 			})
 		case map[string]interface{}:
 			// Поле для добавления в лог дополнительных данных контекста
@@ -162,5 +161,6 @@ func contains(a []string, x string) bool {
 			return true
 		}
 	}
+
 	return false
 }
