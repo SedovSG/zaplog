@@ -13,7 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var zapLogger *zap.Logger
+var zapLogger *zap.Logger = new(zap.Logger)
 
 // Метод инициализации
 func init() {

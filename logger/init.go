@@ -57,8 +57,9 @@ func AddFields(fields []interface{}, logger *zap.Logger) *zap.Logger {
 		code     int
 		request  []byte
 		response []byte
-		extend   []interface{}
 	)
+
+	extend := make([]interface{}, 0, len(fields))
 
 	methods := []string{"GET", "PUT", "POST", "HEAD", "DELETE", "OPTIONS"}
 
