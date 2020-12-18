@@ -3,7 +3,6 @@ PROJECT_NAME=$(shell basename "$(PWD)")
 .PHONY: setup lint test cover format build clean help
 
 setup: ## Установить зависимости
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.33.0
 	go get -u go.uber.org/zap
 	go mod tidy
 

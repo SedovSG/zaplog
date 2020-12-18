@@ -15,6 +15,7 @@ go:
 
 before_install:
   - sudo apt-get -y install curl
+  - sudo curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.33.0
   - make setup
 addons:
   apt:
